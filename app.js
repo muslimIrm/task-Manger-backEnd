@@ -3,9 +3,10 @@ const mongodb = require("mongoose")
 const authRouter = require("./router/Auth")
 const Todos = require("./router/Todos")
 const app = exporess()
+const cors = require('cors');
 require('dotenv').config();
 app.use(exporess.json());
-
+app.use(cors());
 mongodb.connect(process.env.DB_URL)
 .then(()=>{
     console.log("connected to Mongodb")

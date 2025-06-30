@@ -79,4 +79,24 @@ router.put("/todos/:userId/:todoId",verfiyToken, asyncHandler(async (req, res)=>
     res.status(201).json(todoUpdate)
 }))
 
+
+router.delete("/todos/delete/:userId/:todoId",verfiyToken ,asyncHandler(async (req, res)=>{
+    const { userId, todoId } = req.params;
+    const user = await TodosUser.findOne({userId: userId})
+    if(!todos){
+        res.status(404).json({message: "Not Found"})
+    }
+    if (!mongoose.Types.ObjectId.isValid(todoId)) {
+        return res.status(400).json({ message: "No provided" });
+    }
+
+    const todoDelete = await TodosUser.findOneAndDelete({"userId": userId, "todos._id": todoId})
+    if(!todoDelete){
+        return res.status(400).json({message: "there was somethings wrong!"})
+    }
+
+    res.status(200).json({message: "Task has beed deleted successfully."})
+
+}))
+
 module.exports = router

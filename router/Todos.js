@@ -80,23 +80,33 @@ router.put("/todos/:userId/:todoId",verfiyToken, asyncHandler(async (req, res)=>
 }))
 
 
-router.delete("/todos/delete/:userId/:todoId",verfiyToken ,asyncHandler(async (req, res)=>{
+router.delete("/todos/delete/:userId/:todoId", verfiyToken, asyncHandler(async (req, res) => {
     const { userId, todoId } = req.params;
-    const user = await TodosUser.findOne({userId: userId})
-    if(!todos){
-        res.status(404).json({message: "Not Found"})
+
+    // تأكد أن المستخدم موجود
+    const user = await TodosUser.findOne({ userId: userId });
+    if (!user) {
+        return res.status(404).json({ message: "User Not Found" });
     }
+
+    // تأكد من صحة الـ ID
     if (!mongoose.Types.ObjectId.isValid(todoId)) {
-        return res.status(400).json({ message: "No provided" });
+        return res.status(400).json({ message: "Invalid todo ID" });
     }
 
-    const todoDelete = await TodosUser.findOneAndDelete({"userId": userId, "todos._id": todoId})
-    if(!todoDelete){
-        return res.status(400).json({message: "there was somethings wrong!"})
+    // احذف المهمة من مصفوفة todos داخل المستخدم
+    const result = await TodosUser.findOneAndUpdate(
+        { userId },
+        { $pull: { todos: { _id: todoId } } },
+        { new: true }
+    );
+
+    if (!result) {
+        return res.status(400).json({ message: "Task not deleted" });
     }
 
-    res.status(200).json({message: "Task has beed deleted successfully."})
+    res.status(200).json({ message: "Task has been deleted successfully." });
+}));
 
-}))
 
 module.exports = router
